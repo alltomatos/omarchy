@@ -48,7 +48,7 @@
   "trigger.toggle": {"icon":"󰔎","label":"Alternar Recursos","aliases":["toggle","alternar"]},
   "trigger.hardware": {"icon":"","label":"Hardware","aliases":["hardware","hw"]},
   "trigger.tests": {"icon":"󰓅","label":"Testes de Desempenho"},
-  "trigger.reminder.set": {"icon":"󰢌","label":"Criar Lembrete","action":"omarchy-reminder -i"},
+  "trigger.reminder.set": {"icon":"󰢌","label":"Criar Lembrete","aliases":["reminder-set","remind"],"action":"omarchy-reminder -i"},
   "trigger.reminder.show": {"icon":"󰢌","label":"Ver Todos os Lembretes","action":"omarchy-reminder show"},
   "trigger.reminder.clear": {"icon":"󰢌","label":"Limpar Todos","action":"omarchy-reminder clear"},
   "trigger.share.clipboard": {"icon":"","label":"Área de Transferência","action":"omarchy-menu-share clipboard"},
