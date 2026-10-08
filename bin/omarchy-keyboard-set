@@ -22,7 +22,13 @@ fi
 apply_hyprland() {
   local target_layout="$layout"
   local target_variant="${variant:-}"
-  local target_options="compose:caps,shift:both_capslock_cancel"
+
+  # Read current kb_options from Hyprland if available, otherwise preserve defaults
+  local current_options=""
+  if command -v hyprctl >/dev/null 2>&1; then
+    current_options=$(hyprctl -j getoption input:kb_options 2>/dev/null | grep -Po '(?<="str": ")[^"]*' || true)
+  fi
+  local target_options="${current_options:-compose:caps,shift:both_capslock_cancel}"
 
   # Non-Latin layouts list from default/hypr/input.lua and omarchy_hooks.conf.
   # Hyprland resolves keybindings against the first entry in kb_layout, so
@@ -33,13 +39,25 @@ apply_hyprland() {
   if [[ $non_latin_layouts == *" $primary "* ]]; then
     target_layout="us,$target_layout"
     target_variant=",$target_variant"
-    target_options="$target_options,grp:alts_toggle"
+    if [[ $target_options != *"grp:alts_toggle"* ]]; then
+      target_options="${target_options:+$target_options,}grp:alts_toggle"
+    fi
+  else
+    # Remove grp:alts_toggle if switching back to Latin layout
+    target_options=$(echo "$target_options" | sed -E 's/(^|,)grp:alts_toggle//; s/^,//')
   fi
 
-  local lua_cmd="hl.config({ input = { kb_layout = \"$target_layout\", kb_variant = \"$target_variant\", kb_options = \"$target_options\" } })"
+  local lua_cmd
+  if [[ -n $target_options ]]; then
+    lua_cmd="hl.config({ input = { kb_layout = \"$target_layout\", kb_variant = \"$target_variant\", kb_options = \"$target_options\" } })"
+  else
+    lua_cmd="hl.config({ input = { kb_layout = \"$target_layout\", kb_variant = \"$target_variant\" } })"
+  fi
 
   if command -v hyprctl >/dev/null 2>&1; then
-    hyprctl eval "$lua_cmd" >/dev/null 2>&1 || true
+    if ! hyprctl eval "$lua_cmd" >/dev/null 2>&1; then
+      echo "Warning: hyprctl eval failed to apply keyboard layout immediately" >&2
+    fi
   fi
 }
 
