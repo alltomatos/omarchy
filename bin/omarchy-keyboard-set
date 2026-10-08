@@ -23,34 +23,29 @@ apply_hyprland() {
   local target_layout="$layout"
   local target_variant="${variant:-}"
 
-  # Read current kb_options from Hyprland if available, otherwise preserve defaults
-  local current_options=""
-  if command -v hyprctl >/dev/null 2>&1; then
-    current_options=$(hyprctl -j getoption input:kb_options 2>/dev/null | grep -Po '(?<="str": ")[^"]*' || true)
-  fi
-  local target_options="${current_options:-compose:caps,shift:both_capslock_cancel}"
-
   # Non-Latin layouts list from default/hypr/input.lua and omarchy_hooks.conf.
   # Hyprland resolves keybindings against the first entry in kb_layout, so
   # non-Latin layouts must be prefixed with "us," and provide an alt-toggle option.
   local non_latin_layouts=" af am ara bd bg by et ge gr il in iq ir kg kh kz la lk mk mm mn mv np rs ru sy th tj ua "
   local primary="${layout%%,*}"
 
+  local lua_cmd
   if [[ $non_latin_layouts == *" $primary "* ]]; then
     target_layout="us,$target_layout"
     target_variant=",$target_variant"
+
+    # Read live kb_options from Hyprland and preserve custom options without overwriting them
+    local current_options=""
+    if command -v hyprctl >/dev/null 2>&1; then
+      current_options=$(hyprctl -j getoption input:kb_options 2>/dev/null | grep -Po '(?<="str": ")[^"]*' || true)
+    fi
+    local target_options="${current_options:-compose:caps,shift:both_capslock_cancel}"
     if [[ $target_options != *"grp:alts_toggle"* ]]; then
       target_options="${target_options:+$target_options,}grp:alts_toggle"
     fi
-  else
-    # Remove grp:alts_toggle if switching back to Latin layout
-    target_options=$(echo "$target_options" | sed -E 's/(^|,)grp:alts_toggle//; s/^,//')
-  fi
-
-  local lua_cmd
-  if [[ -n $target_options ]]; then
     lua_cmd="hl.config({ input = { kb_layout = \"$target_layout\", kb_variant = \"$target_variant\", kb_options = \"$target_options\" } })"
   else
+    # For Latin layouts, do NOT touch or pass kb_options at all — preserve all user custom options intact
     lua_cmd="hl.config({ input = { kb_layout = \"$target_layout\", kb_variant = \"$target_variant\" } })"
   fi
 
