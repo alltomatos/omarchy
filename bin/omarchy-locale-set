@@ -41,17 +41,17 @@ elevate() {
 if [[ -f /etc/locale.gen ]]; then
   if ! grep -q "^${target_locale}" /etc/locale.gen; then
     echo "Enabling $target_locale in /etc/locale.gen..."
-    elevate sed -i "s/^#\s*${target_locale}/${target_locale}/" /etc/locale.gen || true
+    elevate sed -i "s/^#\s*${target_locale}/${target_locale}/" /etc/locale.gen
   fi
   echo "Generating locales..."
-  elevate locale-gen || true
+  elevate locale-gen
 fi
 
 # Set system locale via localectl or /etc/locale.conf
 if command -v localectl >/dev/null 2>&1; then
-  elevate localectl set-locale LANG="$target_locale" LC_TIME="$target_locale" || true
+  elevate localectl set-locale LANG="$target_locale" LC_TIME="$target_locale"
 else
-  elevate bash -c "echo 'LANG=$target_locale' > /etc/locale.conf" || true
+  elevate bash -c "echo 'LANG=$target_locale' > /etc/locale.conf"
 fi
 
 omarchy-notification-send -g 󰗊 "Locale set to $target_locale (log out to apply system-wide)"

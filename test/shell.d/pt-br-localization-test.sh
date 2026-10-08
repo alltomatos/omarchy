@@ -43,8 +43,7 @@ grep -F 'omarchy-menu.pt_BR.jsonc' "$menu_qml" >/dev/null || fail "Menu.qml load
 
 pass "Menu.qml dynamically routes to Portuguese catalog on pt-BR locales"
 
-# 4. Keyboard set script uses safe bash syntax
-! grep -F 'eval' "$keyboard_cmd" >/dev/null || fail "keyboard-set does not use unsafe eval"
-grep -F 'hyprctl keyword input:kb_layout' "$keyboard_cmd" >/dev/null || fail "keyboard-set updates Hyprland layout"
+# 4. Keyboard set script uses hyprctl eval hl.config safely
+grep -F 'hyprctl eval "$lua_cmd"' "$keyboard_cmd" >/dev/null || fail "keyboard-set updates Hyprland layout via hyprctl eval"
 
 pass "omarchy-keyboard-set updates live compositor state safely"

@@ -18,14 +18,21 @@ if [[ -z $layout ]]; then
   exit 1
 fi
 
-# Apply immediately to Hyprland seat
-if [[ -n $variant ]]; then
-  hyprctl keyword input:kb_layout "$layout" >/dev/null 2>&1 || true
-  hyprctl keyword input:kb_variant "$variant" >/dev/null 2>&1 || true
-else
-  hyprctl keyword input:kb_layout "$layout" >/dev/null 2>&1 || true
-  hyprctl keyword input:kb_variant "" >/dev/null 2>&1 || true
-fi
+# Apply immediately to Hyprland seat using supported hl.config Lua evaluation
+apply_hyprland() {
+  local lua_cmd
+  if [[ -n $variant ]]; then
+    lua_cmd="hl.config({ input = { kb_layout = \"$layout\", kb_variant = \"$variant\" } })"
+  else
+    lua_cmd="hl.config({ input = { kb_layout = \"$layout\", kb_variant = \"\" } })"
+  fi
+
+  if command -v hyprctl >/dev/null 2>&1; then
+    hyprctl eval "$lua_cmd" >/dev/null 2>&1 || hyprctl keyword input:kb_layout "$layout" >/dev/null 2>&1 || true
+  fi
+}
+
+apply_hyprland
 
 # Persist to /etc/vconsole.conf if writable or via sudo
 persist_vconsole() {
@@ -49,19 +56,24 @@ persist_vconsole() {
     [[ -n $variant ]] && echo "XKBVARIANT=$variant"
   } >> "$temp_file"
 
+  local status=0
   if [[ -w $target ]]; then
-    cat "$temp_file" > "$target"
+    cat "$temp_file" > "$target" || status=$?
   else
     if [[ -t 0 ]]; then
-      sudo cp "$temp_file" "$target"
+      sudo cp "$temp_file" "$target" || status=$?
     else
-      pkexec cp "$temp_file" "$target"
+      pkexec cp "$temp_file" "$target" || status=$?
     fi
   fi
   rm -f "$temp_file"
+  return $status
 }
 
-persist_vconsole || echo "Warning: Could not persist to /etc/vconsole.conf" >&2
+if ! persist_vconsole; then
+  echo "Error: Failed to persist keyboard configuration to /etc/vconsole.conf" >&2
+  exit 1
+fi
 
 # Notify user and refresh shell indicators
 if [[ -n $variant ]]; then
