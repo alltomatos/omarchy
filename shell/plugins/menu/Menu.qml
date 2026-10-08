@@ -47,7 +47,9 @@ Item {
   // JSONC menu definitions. The shell parses both at startup and merges
   // the user file on top of the defaults, so the keybind → IPC → visible
   // path doesn't have to shell out to bash + jq on every open.
-  property string defaultMenuPath: omarchyPath + "/default/omarchy/omarchy-menu.jsonc"
+  readonly property string systemLocaleName: String(Quickshell.env("LANG") || Qt.locale().name || "")
+  readonly property bool isPtBrLocale: systemLocaleName.indexOf("pt_BR") !== -1 || systemLocaleName.indexOf("pt-BR") !== -1
+  property string defaultMenuPath: omarchyPath + (isPtBrLocale ? "/default/omarchy/omarchy-menu.pt_BR.jsonc" : "/default/omarchy/omarchy-menu.jsonc")
   property string userMenuPath: Quickshell.env("HOME") + "/.config/omarchy/extensions/omarchy-menu.jsonc"
   property var defaultMenuItems: []
   property var userMenuItems: []

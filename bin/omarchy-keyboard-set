@@ -1,0 +1,71 @@
+#!/bin/bash
+
+# omarchy:summary=Configure the active keyboard layout for the system and desktop
+# omarchy:group=keyboard
+# omarchy:name=set
+# omarchy:args=<layout> [variant]
+# omarchy:desc=Set the console and Hyprland keyboard layout (e.g. br abnt2, us intl)
+
+set -e
+
+layout="$1"
+variant="${2:-}"
+
+if [[ -z $layout ]]; then
+  echo "Usage: omarchy keyboard set <layout> [variant]" >&2
+  echo "Example: omarchy keyboard set br abnt2" >&2
+  echo "Example: omarchy keyboard set us intl" >&2
+  exit 1
+fi
+
+# Apply immediately to Hyprland seat
+if [[ -n $variant ]]; then
+  hyprctl keyword input:kb_layout "$layout" >/dev/null 2>&1 || true
+  hyprctl keyword input:kb_variant "$variant" >/dev/null 2>&1 || true
+else
+  hyprctl keyword input:kb_layout "$layout" >/dev/null 2>&1 || true
+  hyprctl keyword input:kb_variant "" >/dev/null 2>&1 || true
+fi
+
+# Persist to /etc/vconsole.conf if writable or via sudo
+persist_vconsole() {
+  local target="/etc/vconsole.conf"
+  local temp_file
+  temp_file=$(mktemp)
+
+  if [[ -f $target ]]; then
+    grep -v -E '^(KEYMAP|XKBLAYOUT|XKBVARIANT)=' "$target" > "$temp_file" || true
+  fi
+
+  # Map common XKB to console keymap
+  local console_keymap="$layout"
+  if [[ $layout == "br" ]]; then
+    console_keymap="br-abnt2"
+  fi
+
+  {
+    echo "KEYMAP=$console_keymap"
+    echo "XKBLAYOUT=$layout"
+    [[ -n $variant ]] && echo "XKBVARIANT=$variant"
+  } >> "$temp_file"
+
+  if [[ -w $target ]]; then
+    cat "$temp_file" > "$target"
+  else
+    if [[ -t 0 ]]; then
+      sudo cp "$temp_file" "$target"
+    else
+      pkexec cp "$temp_file" "$target"
+    fi
+  fi
+  rm -f "$temp_file"
+}
+
+persist_vconsole || echo "Warning: Could not persist to /etc/vconsole.conf" >&2
+
+# Notify user and refresh shell indicators
+if [[ -n $variant ]]; then
+  omarchy-notification-send -g  "Keyboard layout set to $layout ($variant)"
+else
+  omarchy-notification-send -g  "Keyboard layout set to $layout"
+fi
