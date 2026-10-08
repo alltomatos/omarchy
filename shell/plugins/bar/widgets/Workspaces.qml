@@ -35,6 +35,12 @@ BarWidget {
     root.bar.run("hyprctl dispatch " + Util.shellQuote("hl.dsp.focus({ workspace = \"" + id + "\" })"))
   }
 
+  function cycleWorkspace(delta) {
+    if (!root.bar) return
+    var target = delta > 0 ? "e-1" : "e+1"
+    root.bar.run("hyprctl dispatch " + Util.shellQuote("hl.dsp.focus({ workspace = \"" + target + "\" })"))
+  }
+
   readonly property real trailingGap: root.vertical ? 0 : Style.spaceReal(1.5)
 
   implicitWidth: grid.implicitWidth + trailingGap
@@ -65,8 +71,19 @@ BarWidget {
         verticalPadding: 6
         fixedWidth: root.vertical ? root.barSize : Style.space(20)
         fixedHeight: root.barSize
+        tooltipText: "Workspace " + modelData + " (Super + " + (modelData === 10 ? "0" : modelData) + ")"
         onPressed: function() { root.focusWorkspace(modelData) }
+        onWheelMoved: function(delta) { root.cycleWorkspace(delta) }
       }
+    }
+  }
+
+  MouseArea {
+    anchors.fill: parent
+    z: -1
+    acceptedButtons: Qt.NoButton
+    onWheel: function(wheel) {
+      root.cycleWorkspace(wheel.angleDelta.y)
     }
   }
 }

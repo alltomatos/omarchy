@@ -437,6 +437,12 @@ Item {
       MouseArea {
         anchors.fill: parent
         acceptedButtons: Qt.LeftButton | Qt.RightButton
+        onClicked: function(mouse) {
+          if (mouse.button === Qt.RightButton) {
+            Util.execArgv(["omarchy-shell", "shell", "toggle", "omarchy.menu", "{\"menu\":\"root\"}"])
+            mouse.accepted = true
+          }
+        }
         onDoubleClicked: function(mouse) {
           if (mouse.button === Qt.RightButton) root.openThemeSwitcher()
           else root.openSelector()
