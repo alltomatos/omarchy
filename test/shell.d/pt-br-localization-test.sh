@@ -43,7 +43,8 @@ grep -F 'omarchy-menu.pt_BR.jsonc' "$menu_qml" >/dev/null || fail "Menu.qml load
 
 pass "Menu.qml dynamically routes to Portuguese catalog on pt-BR locales"
 
-# 4. Keyboard set script uses hyprctl eval hl.config safely
+# 4. Keyboard set script uses hyprctl eval hl.config safely and preserves Latin shortcuts
 grep -F 'hyprctl eval "$lua_cmd"' "$keyboard_cmd" >/dev/null || fail "keyboard-set updates Hyprland layout via hyprctl eval"
+grep -F 'non_latin_layouts' "$keyboard_cmd" >/dev/null || fail "keyboard-set handles non-Latin layout rules"
 
-pass "omarchy-keyboard-set updates live compositor state safely"
+pass "omarchy-keyboard-set updates live compositor state safely with non-Latin fallback"

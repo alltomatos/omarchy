@@ -20,15 +20,26 @@ fi
 
 # Apply immediately to Hyprland seat using supported hl.config Lua evaluation
 apply_hyprland() {
-  local lua_cmd
-  if [[ -n $variant ]]; then
-    lua_cmd="hl.config({ input = { kb_layout = \"$layout\", kb_variant = \"$variant\" } })"
-  else
-    lua_cmd="hl.config({ input = { kb_layout = \"$layout\", kb_variant = \"\" } })"
+  local target_layout="$layout"
+  local target_variant="${variant:-}"
+  local target_options="compose:caps,shift:both_capslock_cancel"
+
+  # Non-Latin layouts list from default/hypr/input.lua and omarchy_hooks.conf.
+  # Hyprland resolves keybindings against the first entry in kb_layout, so
+  # non-Latin layouts must be prefixed with "us," and provide an alt-toggle option.
+  local non_latin_layouts=" af am ara bd bg by et ge gr il in iq ir kg kh kz la lk mk mm mn mv np rs ru sy th tj ua "
+  local primary="${layout%%,*}"
+
+  if [[ $non_latin_layouts == *" $primary "* ]]; then
+    target_layout="us,$target_layout"
+    target_variant=",$target_variant"
+    target_options="$target_options,grp:alts_toggle"
   fi
 
+  local lua_cmd="hl.config({ input = { kb_layout = \"$target_layout\", kb_variant = \"$target_variant\", kb_options = \"$target_options\" } })"
+
   if command -v hyprctl >/dev/null 2>&1; then
-    hyprctl eval "$lua_cmd" >/dev/null 2>&1 || hyprctl keyword input:kb_layout "$layout" >/dev/null 2>&1 || true
+    hyprctl eval "$lua_cmd" >/dev/null 2>&1 || true
   fi
 }
 
