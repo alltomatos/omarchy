@@ -23,7 +23,7 @@
   "system.reboot": {"icon":"󰜉","label":"Reiniciar","action":"omarchy-system-reboot"},
   "system.shutdown": {"icon":"󰐥","label":"Desligar","action":"omarchy-system-shutdown"},
 
-  // Aprender
+  // Aprende
   "learn.keybindings": {"icon":"","label":"Atalhos de Teclado","action":"omarchy-menu-keybindings"},
   "learn.omarchy": {"icon":"","label":"Manual do Omarchy","action":"omarchy-launch-webapp 'https://omarchy.org/manual/'"},
   "learn.hyprland": {"icon":"","label":"Documentação Hyprland","action":"omarchy-launch-webapp 'https://wiki.hypr.land/'"},
@@ -96,7 +96,7 @@
   "setup.security": {"icon":"","label":"Segurança e Autenticação"},
   "setup.reset": {"icon":"󰑓","label":"Restaurar Padrões de Fábrica","when":"[[ $(findmnt -no FSTYPE /) == btrfs ]]","action":"omarchy-launch-floating-terminal-with-presentation omarchy-system-factory-reset"},
 
-  // Instalar
+  // Instala
   "install.package": {"icon":"󰣇","label":"Pacote Arch (Pacman)","action":"xdg-terminal-exec --app-id=org.omarchy.terminal omarchy-pkg-install"},
   "install.aur": {"icon":"󰣇","label":"Pacote AUR","action":"xdg-terminal-exec --app-id=org.omarchy.terminal omarchy-pkg-aur-install"},
   "install.ai": {"icon":"󱚤","label":"Ferramentas de IA"},
@@ -108,12 +108,12 @@
   "install.browser": {"icon":"","label":"Navegadores de Internet"},
   "install.terminal": {"icon":"","label":"Emuladores de Terminal"},
 
-  // Remover
+  // Remove
   "remove.package": {"icon":"󰣇","label":"Desinstalar Pacote","action":"xdg-terminal-exec --app-id=org.omarchy.terminal omarchy-pkg-remove"},
   "remove.theme": {"icon":"󰸌","label":"Remover Tema","action":"omarchy-theme-remove"},
   "remove.webapp": {"icon":"","label":"Remover Aplicativo Web","when":"grep -qE '^Exec=.*(omarchy-launch-webapp|omarchy-webapp-handler)' $HOME/.local/share/applications/*.desktop","action":"omarchy-webapp-remove"},
 
-  // Atualizar
+  // Atualiza
   "update.omarchy": {"icon":"","iconFont":"omarchy","label":"Atualizar Omarchy","action":"omarchy-launch-floating-terminal-with-presentation omarchy-update"},
   "update.channel": {"icon":"󰔫","label":"Canal de Atualização (Stable / RC)"},
   "update.themes": {"icon":"󰸌","label":"Atualizar Temas Extras","when":"omarchy-theme-extras","action":"omarchy-launch-floating-terminal-with-presentation omarchy-theme-update"},
